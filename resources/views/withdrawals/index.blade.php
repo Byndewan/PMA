@@ -1,126 +1,108 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen Withdraw')
+@section('page-title', 'Daftar Produk Cetak')
+
+@section('page-actions')
+    <a href="{{ route('products.create') }}" class="btn-primary">
+        + Produk Baru
+    </a>
+@endsection
 
 @section('content')
-<div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h1 class="text-xl font-semibold text-gray-800">Manajemen Withdraw</h1>
-        <div class="flex items-center mt-2 text-sm text-gray-500">
-            <span class="mr-4">Total: Rp {{ number_format($totalWithdrawals) }}</span>
-            <span>Pending: Rp {{ number_format($pendingWithdrawals) }}</span>
-        </div>
+<div class="mb-4 flex items-center justify-between">
+    <div class="flex-1 max-w-md">
+        <input
+            type="text"
+            placeholder="Cari produk..."
+            class="w-full border rounded-lg px-4 py-2"
+            id="search-input"
+        >
     </div>
-
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Operator</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jumlah</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metode</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
-                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($withdrawals as $withdrawal)
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                                <span class="text-gray-600">{{ strtoupper(substr($withdrawal->user->name, 0, 1)) }}</span>
-                            </div>
-                            <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">{{ $withdrawal->user->name }}</div>
-                                <div class="text-sm text-gray-500">{{ $withdrawal->user->email }}</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        Rp {{ number_format($withdrawal->amount) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $withdrawal->method ?: 'Bank Transfer' }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @include('partials.status-badge', ['status' => $withdrawal->status])
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {{ $withdrawal->created_at->translatedFormat('d M Y H:i') }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="openModal('{{ route('withdrawals.show', $withdrawal->id) }}')"
-                            class="text-blue-600 hover:text-blue-900 mr-3 inline-flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            Detail
-                        </button>
-
-                        @if($withdrawal->status == 'pending' && auth()->user()->isAdmin())
-                        <button onclick="processWithdrawal({{ $withdrawal->id }}, 'approve')"
-                            class="text-green-600 hover:text-green-900 mr-3 inline-flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                            </svg>
-                            Approve
-                        </button>
-                        <button onclick="processWithdrawal({{ $withdrawal->id }}, 'reject')"
-                            class="text-red-600 hover:text-red-900 inline-flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            Reject
-                        </button>
-                        @endif
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                        Tidak ada data withdraw
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+    <div>
+        <select id="status-filter" class="border rounded-lg px-4 py-2">
+            <option value="">Semua Status</option>
+            <option value="active">Aktif</option>
+            <option value="inactive">Nonaktif</option>
+        </select>
     </div>
+</div>
 
-    @if($withdrawals->hasPages())
-    <div class="px-6 py-3 border-t border-gray-100 bg-gray-50">
-        {{ $withdrawals->links() }}
-    </div>
-    @endif
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Produk</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Format</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee Operator</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @foreach($products as $product)
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="font-medium text-gray-900">{{ $product->name }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                    {{ $product->format }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="font-medium">Rp {{ number_format($product->price) }}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                    Rp {{ number_format($product->operator_fee) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    @include('partials.status-badge', [
+                        'status' => $product->is_active ? 'active' : 'inactive'
+                    ])
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('products.edit', $product->id) }}" class="text-blue-600 hover:text-blue-900 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                            Edit
+                        </a>
+                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-600 hover:text-red-900 flex items-center" onclick="return confirm('Hapus produk ini?')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    {{ $products->links() }}
 </div>
 
 <script>
-function processWithdrawal(id, action) {
-    const actionText = action === 'approve' ? 'approve' : 'reject';
-    if(confirm(`Apakah Anda yakin ingin ${actionText} withdrawal ini?`)) {
-        fetch(`/withdrawals/${id}/${action}`, {
-            method: 'PUT',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if(data.success) {
-                window.location.reload();
-            } else {
-                alert(data.message || 'Terjadi kesalahan');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan');
+    // Live search functionality
+    document.getElementById('search-input').addEventListener('input', function(e) {
+        const searchValue = e.target.value.toLowerCase();
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const productName = row.querySelector('td:first-child').textContent.toLowerCase();
+            row.style.display = productName.includes(searchValue) ? '' : 'none';
         });
-    }
-}
+    });
+
+    // Status filter
+    document.getElementById('status-filter').addEventListener('change', function(e) {
+        const status = e.target.value;
+        window.location.href = "{{ route('products.index') }}?status=" + status;
+    });
 </script>
 @endsection

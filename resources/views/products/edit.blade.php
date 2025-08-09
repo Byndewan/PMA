@@ -1,12 +1,29 @@
-<div class="bg-white rounded-lg overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h3 class="text-lg font-medium text-gray-900">Edit Produk</h3>
-        <p class="text-sm text-gray-500 mt-1">ID: {{ $product->id }}</p>
+@extends('layouts.app')
+
+@section('page-title', 'Edit Produk')
+
+@section('content')
+<form action="{{ route('products.update', $product->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Field sama dengan create, tapi dengan value -->
+        <div>
+            <label for="name" class="block mb-1">Nama Produk</label>
+            <input type="text" id="name" name="name" value="{{ $product->name }}" required class="w-full border rounded p-2">
+        </div>
+
+        <!-- ... (field lainnya) ... -->
     </div>
 
-    @include('products._form', [
-        'action' => route('products.update', $product->id),
-        'method' => 'PUT',
-        'product' => $product
-    ])
-</div>
+    <div class="mt-6 flex justify-end space-x-3">
+        <a href="{{ route('products.index') }}" class="btn-secondary">
+            Batal
+        </a>
+        <button type="submit" class="btn-primary">
+            Update Produk
+        </button>
+    </div>
+</form>
+@endsection
