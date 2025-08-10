@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Models\QrToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class QrTokenController extends Controller
 {
@@ -48,10 +47,10 @@ class QrTokenController extends Controller
         // Mark token as used
         $qrToken->update([
             'used_at' => now(),
-            'user_id' => $qrToken->user_id, // Assuming you have user_id in qr_tokens
+            'user_id' => $qrToken->user_id, // Link to operator account
         ]);
 
-        // Login the user
+        // Login the operator
         Auth::loginUsingId($qrToken->user_id);
 
         $request->session()->regenerate();

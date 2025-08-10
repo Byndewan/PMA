@@ -11,6 +11,7 @@ class WithdrawalController extends Controller
     public function index()
     {
         $withdrawals = Withdrawal::with(['user', 'approver'])
+            ->filter(request(['status']))
             ->latest()
             ->paginate(10);
 
@@ -26,6 +27,7 @@ class WithdrawalController extends Controller
     {
         $request->validate([
             'amount' => 'required|numeric|min:10000',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         $user = $request->user();
@@ -37,22 +39,25 @@ class WithdrawalController extends Controller
         Withdrawal::create([
             'user_id' => $user->id,
             'amount' => $request->amount,
+            'notes' => $request->notes,
             'status' => 'pending',
         ]);
 
-        return back()->with('success', 'Permintaan withdraw berhasil diajukan');
+        return redirect()->back()->with('success', 'Withdrawal request submitted');
     }
 
-    public function show($id)
+    public function show(Withdrawal $withdrawal)
     {
-        $withdrawal = Withdrawal::find($id);
+        $this->authorize('view', $withdrawal);
         return view('withdrawals.show', compact('withdrawal'));
     }
 
     public function approve(Withdrawal $withdrawal)
     {
+        $this->authorize('approve', $withdrawal);
+
         if ($withdrawal->status !== 'pending') {
-            return back()->with('error', 'Withdrawal sudah diproses');
+            return back()->with('error', 'Withdrawal already processed');
         }
 
         DB::transaction(function () use ($withdrawal) {
@@ -65,6 +70,18 @@ class WithdrawalController extends Controller
             $withdrawal->user->decrement('balance', $withdrawal->amount);
         });
 
-        return back()->with('success', 'Withdrawal berhasil diapprove');
+        return back()->with('success', 'Withdrawal approved successfully');
+    }
+
+    public function destroy(Withdrawal $withdrawal)
+    {
+        $this->authorize('delete', $withdrawal);
+
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'Only pending withdrawals can be canceled');
+        }
+
+        $withdrawal->delete();
+        return back()->with('success', 'Withdrawal canceled successfully');
     }
 }

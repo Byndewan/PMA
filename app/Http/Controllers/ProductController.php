@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-<?php
-
-namespace App\Http\Controllers;
-
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::latest()->paginate(10);
+        $products = Product::latest()->filter(
+            request(['search', 'status'])
+        )->paginate(10);
+
         return view('products.index', compact('products'));
     }
 
@@ -36,6 +36,11 @@ class ProductController extends Controller
         Product::create($data);
 
         return redirect()->route('products.index')->with('success', 'Product created successfully');
+    }
+
+    public function show(Product $product)
+    {
+        return view('products.show', compact('product'));
     }
 
     public function edit(Product $product)

@@ -7,6 +7,8 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -27,23 +29,31 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        DB::transaction(function () use ($request) {
+        $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+        ]);
+
+        return DB::transaction(function () use ($request) {
             $order = Order::create([
                 'user_id' => auth()->id(),
+                'customer_name' => $request->customer_name,
                 'status' => 'queue',
                 'total_price' => 0,
                 'operator_fee_total' => 0,
-                'customer_name' => $request->customer_name,
             ]);
 
             $totalPrice = 0;
             $totalFee = 0;
 
             foreach ($request->items as $item) {
-                $product = Product::findOrFail($item['product_id']);
+                $product = Product::find($item['product_id']);
                 $filePath = $this->storeFile($item['file']);
 
-                $orderItem = OrderItem::create([
+                OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $product->id,
                     'quantity' => $item['quantity'],
@@ -63,9 +73,9 @@ class OrderController extends Controller
 
             // Update operator balance
             auth()->user()->increment('balance', $totalFee);
-        });
 
-        return redirect()->route('orders.index')->with('success', 'Order created successfully');
+            return redirect()->route('orders.index')->with('success', 'Order created successfully');
+        });
     }
 
     public function show(Order $order)
@@ -74,7 +84,13 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
-    public function updateStatus(Request $request, Order $order)
+    public function edit(Order $order)
+    {
+        $this->authorize('update', $order);
+        return view('orders.edit', compact('order'));
+    }
+
+    public function update(Request $request, Order $order)
     {
         $this->authorize('update', $order);
 
@@ -82,9 +98,17 @@ class OrderController extends Controller
             'status' => 'required|in:queue,process,done,taken',
         ]);
 
-        $order->update(['status' => $request->status]);
+        $order->update($request->only('status'));
 
-        return back()->with('success', 'Order status updated');
+        return redirect()->route('orders.index')->with('success', 'Order updated successfully');
+    }
+
+    public function destroy(Order $order)
+    {
+        $this->authorize('delete', $order);
+
+        $order->delete();
+        return back()->with('success', 'Order deleted successfully');
     }
 
     protected function storeFile($file)

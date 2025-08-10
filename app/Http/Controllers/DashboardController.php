@@ -6,12 +6,16 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Withdrawal;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Controller;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        if (auth()->user()->isAdmin()) {
+        $user = Auth::user();
+
+        if ($user->isAdmin()) {
             return $this->adminDashboard();
         }
 
@@ -30,27 +34,20 @@ class DashboardController extends Controller
         $recentOrders = Order::with('user')
             ->latest()
             ->take(5)
-            ->paginate(10);
+            ->get();
 
         $pendingWithdrawals = Withdrawal::with('user')
             ->where('status', 'pending')
             ->latest()
             ->take(5)
-            ->paginate(10);
+            ->get();
 
-        return view('dashboard.admin', [
-            'totalRevenue' => $stats['totalRevenue'],
-            'totalOrders' => $stats['totalOrders'],
-            'totalProducts' => $stats['totalProducts'],
-            'totalOperators' => $stats['totalOperators'],
-            'recentOrders' => $recentOrders,
-            'pendingWithdrawals' => $pendingWithdrawals,
-        ]);
+        return view('dashboard.admin', compact('stats', 'recentOrders', 'pendingWithdrawals'));
     }
 
     protected function operatorDashboard()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $stats = [
             'balance' => $user->balance,
@@ -62,11 +59,16 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        $orders = Order::where('user_id', $user->id)
+        $recentOrders = Order::where('user_id', $user->id)
             ->latest()
             ->take(5)
-            ->paginate(10);
+            ->get();
 
-        return view('dashboard.operator', compact('stats', 'orders'));
+        $recentWithdrawals = Withdrawal::where('user_id', $user->id)
+            ->latest()
+            ->take(3)
+            ->get();
+
+        return view('dashboard.operator', compact('stats', 'recentOrders', 'recentWithdrawals'));
     }
 }

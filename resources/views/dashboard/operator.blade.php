@@ -1,63 +1,165 @@
 @extends('layouts.app')
 
-@section('title', 'Operator Dashboard')
+@section('title', 'Dashboard Operator')
 
 @section('content')
 <div class="space-y-6">
-    <!-- Balance Section -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 border-green-500">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h3 class="text-gray-500 text-sm font-medium uppercase tracking-wider">Saldo Anda</h3>
-                    <p class="text-2xl font-bold text-gray-900 mt-1">Rp {{ number_format(auth()->user()->balance, 0, ',', '.') }}</p>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+    <!-- Welcome Header -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Halo, {{ Auth::user()->name }}!</h1>
+                <p class="text-gray-500 mt-1">Ringkasan aktivitas Anda hari ini</p>
             </div>
-            <button onclick="openModal('/withdrawals/create')"
-                class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Tarik Dana
-            </button>
+            <div class="mt-4 md:mt-0">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-circle text-xs mr-2"></i> Status: Aktif
+                </span>
+            </div>
         </div>
-
-        <!-- Add 2 more cards if needed -->
     </div>
 
-    <!-- Order Management -->
-    <div class="bg-white p-6 rounded-lg shadow-sm">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-            <h3 class="text-lg font-semibold text-gray-900">Manajemen Pesanan</h3>
-            <div class="flex space-x-2">
-                <button onclick="openModal('{{ route('orders.create') }}')"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Pesanan Baru
-                </button>
-                <!-- Add filter/sort buttons if needed -->
+    <!-- Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- Balance Card -->
+        <div class="bg-gradient-to-br from-green-600 to-green-500 rounded-xl shadow-lg overflow-hidden">
+            <div class="p-6 text-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium opacity-90">Saldo Anda</p>
+                        <p class="mt-1 text-3xl font-semibold">Rp {{ number_format($stats['balance']) }}</p>
+                    </div>
+                    <div class="p-3 rounded-lg bg-white bg-opacity-20">
+                        <i class="fas fa-coins text-xl"></i>
+                    </div>
+                </div>
+                <a href="{{ route('withdrawals.create') }}" class="mt-4 inline-flex items-center text-sm font-medium text-white opacity-90 hover:opacity-100 transition-opacity">
+                    Ajukan Withdrawal
+                    <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </a>
             </div>
         </div>
 
-        <div class="overflow-x-auto">
-            @include('orders._table', [
-                'orders' => $orders,
-                'showStatus' => true,
-                'showCustomer' => true
-            ])
+        <!-- Today's Orders Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Pesanan Hari Ini</p>
+                        <p class="mt-1 text-3xl font-semibold text-gray-900">{{ number_format($stats['todayOrders']) }}</p>
+                    </div>
+                    <div class="p-3 rounded-lg bg-blue-100 text-blue-600">
+                        <i class="fas fa-clipboard-list text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm font-medium text-gray-500">
+                    <i class="fas fa-bolt mr-1 text-blue-500"></i>
+                    <span>{{ $stats['todayOrders'] > 0 ? 'Teruskan kerja bagus!' : 'Ayo mulai bekerja!' }}</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Pagination if needed -->
-        @if($orders->hasPages())
-        <div class="mt-4">
-            {{ $orders->links() }}
+        <!-- Pending Orders Card -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Pesanan Pending</p>
+                        <p class="mt-1 text-3xl font-semibold text-gray-900">{{ number_format($stats['pendingOrders']) }}</p>
+                    </div>
+                    <div class="p-3 rounded-lg bg-amber-100 text-amber-600">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ route('orders.index') }}" class="inline-flex items-center text-sm font-medium text-amber-600 hover:text-amber-800 transition-colors">
+                        <i class="fas fa-tasks mr-1"></i> Proses Sekarang
+                    </a>
+                </div>
+            </div>
         </div>
-        @endif
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Pesanan Terbaru Anda</h3>
+                <a href="{{ route('orders.index') }}" class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                    Lihat Semua
+                    <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pelanggan</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($recentOrders as $order)
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ $order->id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->customer_name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">Rp {{ number_format($order->total_price) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @include('partials.status-badge', ['status' => $order->status])
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <a href="{{ route('orders.show', $order->id) }}" class="inline-flex items-center text-blue-600 hover:text-blue-900 transition-colors">
+                                    <i class="fas fa-eye mr-1 text-xs"></i> Detail
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal History -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">Riwayat Withdrawal</h3>
+            </div>
+
+            <div class="space-y-3">
+                @forelse($recentWithdrawals as $withdrawal)
+                <div class="p-4 rounded-lg border border-gray-100 hover:shadow-xs transition-shadow">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                                <i class="fas fa-money-bill-wave text-gray-500"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Rp {{ number_format($withdrawal->amount) }}</p>
+                                <p class="text-xs text-gray-500">{{ $withdrawal->created_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        </div>
+                        <div>
+                            @include('partials.status-badge', ['status' => $withdrawal->status])
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-6">
+                    <i class="fas fa-piggy-bank text-3xl text-gray-300 mb-2"></i>
+                    <p class="text-gray-500">Belum ada riwayat withdrawal</p>
+                    <a href="{{ route('withdrawals.create') }}" class="mt-2 inline-flex items-center text-sm font-medium text-green-600 hover:text-green-800 transition-colors">
+                        <i class="fas fa-plus-circle mr-1"></i> Ajukan Withdrawal
+                    </a>
+                </div>
+                @endforelse
+            </div>
+        </div>
     </div>
 </div>
 @endsection

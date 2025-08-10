@@ -1,73 +1,66 @@
 @extends('layouts.app')
 
-@section('page-title', 'Tambah Produk Baru')
+@section('page-title', 'Ajukan Withdrawal Baru')
 
 @section('content')
-<div class="max-w-3xl mx-auto">
-    <form action="{{ route('products.store') }}" method="POST">
-        @csrf
+<div class="space-y-6">
+    <!-- Withdrawal Form -->
+    <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-xl font-semibold mb-6 text-gray-900 border-b pb-2">Form Withdrawal</h3>
 
-        <div class="bg-white shadow rounded-lg p-6">
-            <div class="space-y-6">
-                <!-- Nama Produk -->
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Nama Produk</label>
-                    <input type="text" id="name" name="name" required
-                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Contoh: Cetak Foto 2R">
-                </div>
+        <form action="{{ route('withdrawals.store') }}" method="POST">
+            @csrf
 
-                <!-- Format & Harga -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="format" class="block text-sm font-medium text-gray-700 mb-1">Format/Ukuran</label>
-                        <input type="text" id="format" name="format" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="Contoh: 2R (6x8 cm)">
-                    </div>
-                    <div>
-                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Harga Satuan (Rp)</label>
-                        <input type="number" id="price" name="price" min="0" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="2500">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Operator Info -->
+                <div class="col-span-1">
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Operator</label>
+                    <div class="flex items-center p-3 border border-gray-300 rounded-lg bg-gray-50">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <span class="text-blue-600 text-lg font-medium">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </span>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</p>
+                            <p class="text-sm text-gray-500">{{ ucfirst(auth()->user()->role) }}</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Fee Operator & Estimasi -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="operator_fee" class="block text-sm font-medium text-gray-700 mb-1">Fee Operator (Rp)</label>
-                        <input type="number" id="operator_fee" name="operator_fee" min="0" value="300" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="estimate_time" class="block text-sm font-medium text-gray-700 mb-1">Estimasi Pengerjaan (menit)</label>
-                        <input type="number" id="estimate_time" name="estimate_time" min="1" required
-                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="15">
+                <!-- Balance Info -->
+                <div class="col-span-1">
+                    <label class="block mb-2 text-sm font-medium text-gray-700">Saldo Tersedia</label>
+                    <div class="p-3 border border-gray-300 rounded-lg bg-gray-50">
+                        <p class="text-2xl font-bold text-gray-900">Rp {{ number_format(auth()->user()->balance) }}</p>
                     </div>
                 </div>
 
-                <!-- Status Aktif -->
-                <div class="flex items-center">
-                    <input type="checkbox" id="is_active" name="is_active" value="1" checked
-                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                    <label for="is_active" class="ml-2 block text-sm text-gray-700">
-                        Produk aktif (tersedia untuk dipesan)
-                    </label>
+                <!-- Amount Input -->
+                <div class="col-span-1 md:col-span-2">
+                    <label for="amount" class="block mb-2 text-sm font-medium text-gray-700">Jumlah Withdrawal</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500">Rp</span>
+                        </div>
+                        <input type="number" id="amount" name="amount" required min="10000" max="{{ auth()->user()->balance }}"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                            placeholder="Masukkan jumlah withdrawal">
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">Minimum withdrawal Rp 10.000</p>
                 </div>
             </div>
 
-            <!-- Tombol Aksi -->
+            <!-- Action Buttons -->
             <div class="mt-8 flex justify-end space-x-3">
-                <a href="{{ route('products.index') }}" class="btn-secondary">
-                    Batal
+                <a href="{{ route('withdrawals.index') }}" class="btn-secondary flex items-center">
+                    <i class="fas fa-times mr-2"></i> Batal
                 </a>
-                <button type="submit" class="btn-primary">
-                    Simpan Produk
+                <button type="submit" class="btn-primary flex items-center">
+                    <i class="fas fa-paper-plane mr-2"></i> Ajukan Withdrawal
                 </button>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 @endsection

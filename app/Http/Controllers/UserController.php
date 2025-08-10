@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::where('role', '!=', 'customer')->latest()->paginate(10);
+        $users = User::where('role', '!=', 'customer')
+            ->filter(request(['search', 'role']))
+            ->latest()
+            ->paginate(10);
+
         return view('users.index', compact('users'));
     }
 
@@ -30,6 +33,7 @@ class UserController extends Controller
             'username' => 'required|string|max:50|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'role' => ['required', Rule::in(['admin', 'operator'])],
+            'balance' => 'sometimes|numeric|min:0',
         ]);
 
         $data['password'] = Hash::make($data['password']);
@@ -37,6 +41,12 @@ class UserController extends Controller
         User::create($data);
 
         return redirect()->route('users.index')->with('success', 'User created successfully');
+    }
+
+    public function show(User $user)
+    {
+        $user->loadCount(['orders', 'withdrawals']);
+        return view('users.show', compact('user'));
     }
 
     public function edit(User $user)
@@ -54,10 +64,14 @@ class UserController extends Controller
             'balance' => 'sometimes|numeric|min:0',
         ];
 
+        if ($request->filled('password')) {
+            $rules['password'] = 'required|string|min:8|confirmed';
+        }
+
         $data = $request->validate($rules);
 
         if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            $data['password'] = Hash::make($data['password']);
         }
 
         $user->update($data);

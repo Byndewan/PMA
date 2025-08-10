@@ -27,7 +27,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Operator Routes (Middleware: auth + operator)
-Route::middleware(['auth', 'role:operator'])->group(function () {
+Route::middleware(['auth', 'role:operator,admin'])->group(function () {
     Route::resource('orders', OrderController::class);
     Route::get('/withdrawals/create', [WithdrawalController::class, 'create'])->name('withdrawals.create');
     Route::get('/withdrawals/show/{id}', [WithdrawalController::class, 'show'])->name('withdrawals.show');
