@@ -43,7 +43,7 @@ class WithdrawalController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->back()->with('success', 'Withdrawal request submitted');
+        return redirect()->route('dashboard')->with('success', 'Withdrawal request submitted');
     }
 
     public function show(Withdrawal $withdrawal)

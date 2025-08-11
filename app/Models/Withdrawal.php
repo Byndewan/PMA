@@ -17,4 +17,12 @@ class Withdrawal extends Model
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+    }
+
 }

@@ -10,13 +10,15 @@ use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 // Auth Routes
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 
-// QR Login
-Route::get('/qr-login', [QrTokenController::class, 'showQRLogin'])->name('qr.login');
-Route::post('/qr-login', [QrTokenController::class, 'verifyQRToken']);
+    // QR Login
+    Route::get('/qr-login', [QrTokenController::class, 'showQRLogin'])->name('qr.login');
+    Route::post('/qr-login', [QrTokenController::class, 'verifyQRToken']);
+});
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Routes (Middleware: auth + admin)
 Route::middleware(['auth', 'role:admin'])->group(function () {

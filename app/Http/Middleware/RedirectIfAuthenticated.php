@@ -7,13 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class RedirectIfRoot
+class RedirectIfAuthenticated
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ...$guards)
     {
-        if ($request->is('/')) {
-            return redirect('/login');
-        } elseif (Auth::check()) {
+        if (Auth::check()) {
             return redirect('/dashboard');
         }
 

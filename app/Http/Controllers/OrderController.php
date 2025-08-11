@@ -30,17 +30,16 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'customer_name' => 'required|string|max:255',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
-            'items.*.file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'items.*.file' => 'required|mimes:jpg,jpeg,png,pdf',
         ]);
+        // dd($request->all());
 
         return DB::transaction(function () use ($request) {
             $order = Order::create([
                 'user_id' => auth()->id(),
-                'customer_name' => $request->customer_name,
                 'status' => 'queue',
                 'total_price' => 0,
                 'operator_fee_total' => 0,
@@ -49,9 +48,12 @@ class OrderController extends Controller
             $totalPrice = 0;
             $totalFee = 0;
 
-            foreach ($request->items as $item) {
-                $product = Product::find($item['product_id']);
-                $filePath = $this->storeFile($item['file']);
+            foreach ($request->items as $index => $item) {
+                $product = Product::findOrFail($item['product_id']);
+
+                $uploadedFile = $request->file("items.$index.file");
+
+                $filePath = $this->storeFile($uploadedFile);
 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -80,34 +82,35 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $this->authorize('view', $order);
         return view('orders.show', compact('order'));
     }
 
     public function edit(Order $order)
     {
-        $this->authorize('update', $order);
         return view('orders.edit', compact('order'));
     }
 
     public function update(Request $request, Order $order)
     {
-        $this->authorize('update', $order);
-
         $request->validate([
             'status' => 'required|in:queue,process,done,taken',
         ]);
 
-        $order->update($request->only('status'));
+        $order->update($request->all());
 
         return redirect()->route('orders.index')->with('success', 'Order updated successfully');
     }
 
-    public function destroy(Order $order)
+    public function destroy($id)
     {
-        $this->authorize('delete', $order);
+        $order = Order::findOrFail($id);
+
+        if ($order->status === 'queue' || $order->status === 'process') {
+            $order->user->decrement('balance', $order->operator_fee_total);
+        }
 
         $order->delete();
+
         return back()->with('success', 'Order deleted successfully');
     }
 

@@ -20,6 +20,7 @@ class QrTokenController extends Controller
         $expiresAt = now()->addMinutes(5);
 
         QrToken::create([
+            'user_id'    => auth()->id(),
             'token' => $token,
             'expired_at' => $expiresAt,
         ]);

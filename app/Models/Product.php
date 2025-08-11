@@ -12,4 +12,17 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search'])) {
+            $query->where('name', 'like', '%' . $filters['search'] . '%')
+                ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+        }
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+}
+
 }
