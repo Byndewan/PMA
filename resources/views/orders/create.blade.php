@@ -28,7 +28,12 @@
             <!-- Customer Information -->
             <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-xs">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800">Informasi Pelanggan</h3>
-                <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="customer_name" class="block mb-1.5 text-sm font-medium text-gray-700">Nama Customer</label>
+                        <input required type="text" id="customer_name" name="customer_name"
+                            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
                     <div>
                         <label for="customer_phone" class="block mb-1.5 text-sm font-medium text-gray-700">Nomor
                             Telepon</label>

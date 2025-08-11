@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('status', ['queue', 'process', 'done', 'taken'])->default('queue');
+            $table->text('customer_name')->nullable();
+            $table->text('phone')->nullable();
             $table->decimal('total_price', 12, 2);
             $table->decimal('operator_fee_total', 12, 2)->default(0);
             $table->text('notes')->nullable();

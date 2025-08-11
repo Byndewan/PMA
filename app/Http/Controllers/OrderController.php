@@ -30,6 +30,8 @@ class OrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'customer_name' => 'required|max:255',
+            'customer_phone' => 'required|max:13',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
@@ -40,6 +42,8 @@ class OrderController extends Controller
         return DB::transaction(function () use ($request) {
             $order = Order::create([
                 'user_id' => auth()->id(),
+                'customer_name' => $request->customer_name,
+                'phone' => $request->customer_phone,
                 'status' => 'queue',
                 'total_price' => 0,
                 'operator_fee_total' => 0,

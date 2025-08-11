@@ -39,20 +39,20 @@
     <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-xs">
         <h3 class="text-lg font-semibold mb-3 text-gray-800">Informasi Pelanggan</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {{-- <div>
+            <div>
                 <p class="text-sm font-medium text-gray-500">Nama</p>
                 <p class="mt-1 text-gray-800">{{ $order->customer_name }}</p>
-            </div> --}}
+            </div>
             @if($order->customer_phone)
             <div>
                 <p class="text-sm font-medium text-gray-500">Telepon</p>
                 <p class="mt-1 text-gray-800">{{ $order->phone }}</p>
             </div>
             @endif
-            <div>
+            {{-- <div>
                 <p class="text-sm font-medium text-gray-500">Waktu Pesanan</p>
                 <p class="mt-1 text-gray-800">{{ $order->created_at->format('d M Y H:i') }}</p>
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -68,7 +68,7 @@
                 <p class="text-sm font-medium text-gray-500">Total Fee Operator</p>
                 <p class="mt-1 text-xl font-semibold text-gray-800">Rp {{ number_format($order->operator_fee_total) }}</p>
             </div>
-            <div class="bg-amber-50 p-4 rounded-lg">
+            {{-- <div class="bg-amber-50 p-4 rounded-lg">
                 <p class="text-sm font-medium text-gray-500">Estimasi Selesai</p>
                 <p class="mt-1 text-xl font-semibold text-gray-800">
                     @if($order->estimated_completion_time)
@@ -77,7 +77,7 @@
                         -
                     @endif
                 </p>
-            </div>
+            </div> --}}
         </div>
     </div>
 

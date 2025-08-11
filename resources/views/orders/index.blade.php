@@ -51,6 +51,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                         <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -61,6 +62,7 @@
                     @foreach($orders as $order)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">#{{ $order->id }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-800">{{ $order->customer_name }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{{ $order->created_at->format('d M Y H:i') }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gray-800">Rp {{ number_format($order->total_price) }}</td>
                         <td class="px-4 py-3 whitespace-nowrap">
