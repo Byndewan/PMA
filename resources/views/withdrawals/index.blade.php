@@ -79,7 +79,7 @@
                             {{ $withdrawal->created_at->format('d M Y H:i') }}
                         </td>
                         <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium space-x-1">
-                            @if(auth()->user()->isAdmin() && $withdrawal->status === 'pending')
+                            @if(Auth::check() && Auth::user()->role === 'admin' && $withdrawal->status === 'pending')
                             <form action="{{ route('withdrawals.approve', $withdrawal->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('PUT')
@@ -91,7 +91,7 @@
                             </form>
                             @endif
 
-                            @if(auth()->user()->isOperator() && $withdrawal->status === 'pending')
+                            {{-- @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'operator']) && $withdrawal->status === 'pending')
                             <form action="{{ route('withdrawals.destroy', $withdrawal->id) }}" method="POST" class="inline">
                                 @csrf
                                 @method('DELETE')
@@ -101,7 +101,7 @@
                                     </svg>
                                 </button>
                             </form>
-                            @endif
+                            @endif --}}
                         </td>
                     </tr>
                     @endforeach

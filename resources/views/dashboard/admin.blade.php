@@ -125,7 +125,7 @@
                             </svg>
                         </div>
                         <div class="ml-3 flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-800 truncate">#{{ $order->id }} - {{ $order->customer_name }}</p>
+                            <p class="text-sm font-medium text-gray-800 truncate">#{{ $order->id }} - {{ $order->user->name }}</p>
                             <p class="text-xs text-gray-500">{{ $order->created_at->diffForHumans() }}</p>
                         </div>
                         <div class="ml-3">

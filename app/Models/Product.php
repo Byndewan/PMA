@@ -20,8 +20,8 @@ class Product extends Model
                 ->orWhere('description', 'like', '%' . $filters['search'] . '%');
         }
 
-        if (!empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+        if (!empty($filters['is_active'])) {
+            $query->where('is_active', $filters['is_active']);
         }
 }
 

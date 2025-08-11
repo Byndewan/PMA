@@ -48,13 +48,11 @@ class WithdrawalController extends Controller
 
     public function show(Withdrawal $withdrawal)
     {
-        $this->authorize('view', $withdrawal);
         return view('withdrawals.show', compact('withdrawal'));
     }
 
     public function approve(Withdrawal $withdrawal)
     {
-        $this->authorize('approve', $withdrawal);
 
         if ($withdrawal->status !== 'pending') {
             return back()->with('error', 'Withdrawal already processed');
@@ -75,7 +73,6 @@ class WithdrawalController extends Controller
 
     public function destroy(Withdrawal $withdrawal)
     {
-        $this->authorize('delete', $withdrawal);
 
         if ($withdrawal->status !== 'pending') {
             return back()->with('error', 'Only pending withdrawals can be canceled');
