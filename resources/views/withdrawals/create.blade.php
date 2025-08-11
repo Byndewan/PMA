@@ -14,7 +14,7 @@
                 <p class="text-sm text-gray-500">Isi formulir untuk mengajukan withdrawal</p>
             </div>
             <div class="flex space-x-2">
-                <a href="{{ route('withdrawals.index') }}" style="text-decoration: none;!important" class="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
+                <a href="{{ route('dashboard') }}" style="text-decoration: none;!important" class="inline-flex items-center px-4 py-2.5 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm">
                     Batal
                 </a>
                 <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
@@ -41,7 +41,7 @@
         <div class="bg-white rounded-lg border border-gray-100 p-4 shadow-xs">
             <h3 class="text-lg font-semibold mb-4 text-gray-800">Saldo Tersedia</h3>
             <div class="p-3 border border-gray-200 rounded-lg bg-gray-50">
-                <p class="text-xl font-semibold text-gray-800">Rp {{ number_format(auth()->user()->balance) }}</p>
+                <p class="text-xl font-semibold text-gray-800">Rp {{ number_format($availableBalance) }}</p>
             </div>
         </div>
 

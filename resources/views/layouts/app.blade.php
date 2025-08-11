@@ -14,10 +14,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <!-- Toastr CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        #toast-container > .toast-success {
+            background-color: #51A351 !important;
+        }
+        #toast-container > .toast-error {
+            background-color: #BD362F !important;
+        }
+        #toast-container > .toast-info {
+            background-color: #2F96B4 !important;
+        }
+        #toast-container > .toast-warning {
+            background-color: #F89406 !important;
+        }
+    </style>
 </head>
 <body class="font-sans antialiased bg-gray-50 min-h-full">
     <div class="min-h-screen flex flex-col">
@@ -45,32 +61,37 @@
         </footer>
     </div>
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <!-- Toastr JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            @if(session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+
+            @if(session('error'))
+                toastr.error("{{ session('error') }}");
+            @endif
+
+            @if(session('info'))
+                toastr.info("{{ session('info') }}");
+            @endif
+
+            @if(session('warning'))
+                toastr.warning("{{ session('warning') }}");
+            @endif
+        });
+    </script>
 
     <!-- Alpine.js -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
 
     <!-- Custom Scripts -->
     @stack('scripts')
-
-    <script>
-        @if(session('success'))
-            toastr.success("{{ session('success') }}");
-        @endif
-
-        @if(session('error'))
-            toastr.error("{{ session('error') }}");
-        @endif
-
-        @if(session('info'))
-            toastr.info("{{ session('info') }}");
-        @endif
-
-        @if(session('warning'))
-            toastr.warning("{{ session('warning') }}");
-        @endif
-    </script>
 
 </body>
 </html>

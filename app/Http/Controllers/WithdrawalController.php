@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Withdrawal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,17 +11,33 @@ class WithdrawalController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
+        $lockedBalance = Order::where('user_id', $user->id)
+            ->whereIn('status', ['queue', 'process'])
+            ->sum('operator_fee_total');
+
+        $availableBalance = $user->balance - $lockedBalance;
+
         $withdrawals = Withdrawal::with(['user', 'approver'])
             ->filter(request(['status']))
             ->latest()
             ->paginate(10);
 
-        return view('withdrawals.index', compact('withdrawals'));
+        return view('withdrawals.index', compact('withdrawals', 'lockedBalance', 'availableBalance'));
     }
 
     public function create()
     {
-        return view('withdrawals.create');
+        $user = auth()->user();
+
+        $lockedBalance = Order::where('user_id', $user->id)
+            ->whereIn('status', ['queue', 'process'])
+            ->sum('operator_fee_total');
+
+        $availableBalance = $user->balance - $lockedBalance;
+
+        return view('withdrawals.create' ,compact('availableBalance'));
     }
 
     public function store(Request $request)
@@ -32,8 +49,14 @@ class WithdrawalController extends Controller
 
         $user = $request->user();
 
-        if ($user->balance < $request->amount) {
-            return back()->with('error', 'Saldo tidak mencukupi');
+        $lockedBalance = Order::where('user_id', $user->id)
+            ->whereIn('status', ['queue', 'process']) // order yang belum selesai
+            ->sum('operator_fee_total');
+
+        $availableBalance = $user->balance - $lockedBalance;
+
+        if ($availableBalance < $request->amount) {
+            return back()->with('error', 'Saldo tidak mencukupi atau masih terikat di order yang sedang dikerjakan.');
         }
 
         Withdrawal::create([

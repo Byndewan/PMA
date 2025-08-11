@@ -24,8 +24,11 @@ class DashboardController extends Controller
 
     protected function adminDashboard()
     {
+        $totalRevenue = Order::sum('total_price');
+        $totalWithdrawn = Withdrawal::where('status', 'approved')->sum('amount');
+
         $stats = [
-            'totalRevenue' => Order::sum('total_price'),
+            'totalRevenue' => $totalRevenue - $totalWithdrawn,
             'totalOrders' => Order::count(),
             'totalProducts' => Product::count(),
             'totalOperators' => User::where('role', 'operator')->count(),
@@ -49,8 +52,16 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        $lockedBalance = Order::where('user_id', $user->id)
+            ->whereIn('status', ['queue', 'process'])
+            ->sum('operator_fee_total');
+
+        $availableBalance = $user->balance - $lockedBalance;
+
         $stats = [
             'balance' => $user->balance,
+            'lockedBalance' => $lockedBalance,
+            'availableBalance' => $availableBalance,
             'todayOrders' => Order::where('user_id', $user->id)
                 ->whereDate('created_at', today())
                 ->count(),
@@ -71,4 +82,5 @@ class DashboardController extends Controller
 
         return view('dashboard.operator', compact('stats', 'recentOrders', 'recentWithdrawals'));
     }
+
 }

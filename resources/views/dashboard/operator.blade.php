@@ -25,8 +25,8 @@
             <div class="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-green-100 opacity-20"></div>
             <div class="relative">
                 <p class="text-sm font-medium text-gray-500">Saldo Anda</p>
-                <p class="mt-1 text-2xl font-semibold text-gray-800">Rp {{ number_format($stats['balance']) }}</p>
-                @if ($stats['balance'] > 10000)
+                <p class="mt-1 text-2xl font-semibold text-gray-800">Rp {{ number_format($stats['availableBalance']) }}</p>
+                @if ($stats['availableBalance'] > 10000)
                     <a href="{{ route('withdrawals.create') }}" style="text-decoration: none;!important" class="mt-3 inline-flex items-center text-sm font-medium text-green-600 hover:text-green-800 transition-colors">
                         Ajukan Withdrawal
                         <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
