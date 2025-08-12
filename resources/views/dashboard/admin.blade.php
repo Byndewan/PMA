@@ -8,7 +8,7 @@
     <div class="bg-white rounded-xl p-6 shadow-xs border border-gray-100">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-800">Selamat Datang, Admin!</h1>
+                <h1 class="text-2xl font-semibold text-gray-800">Selamat Datang, {{ Auth::guard('web')->user()->name }}</h1>
                 <p class="text-gray-500 text-sm mt-1">Ringkasan aktivitas sistem hari ini</p>
             </div>
             <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 text-green-700 text-sm font-medium">
@@ -117,7 +117,7 @@
                 </div>
 
                 <div class="space-y-3">
-                    @foreach($recentOrders as $order)
+                    @forelse($recentOrders as $order)
                     <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100">
                         <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +132,14 @@
                             @include('partials.status-badge', ['status' => $order->status])
                         </div>
                     </div>
-                    @endforeach
+                    @empty
+                    <div class="text-center py-4">
+                        <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <p class="text-gray-500 text-sm mt-2">Belum Ada Pesanan</p>
+                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -181,7 +188,7 @@
                     @empty
                     <div class="text-center py-4">
                         <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                         <p class="text-gray-500 text-sm mt-2">Tidak ada withdrawal pending</p>
                     </div>

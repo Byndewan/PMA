@@ -7,7 +7,6 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
@@ -23,7 +22,7 @@ class OrderController extends Controller
 
     public function create()
     {
-        $products = Product::get();
+        $products = Product::where('is_active', 1)->get();
         return view('orders.create', compact('products'));
     }
 
@@ -37,7 +36,6 @@ class OrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.file' => 'required|mimes:jpg,jpeg,png,pdf',
         ]);
-        // dd($request->all());
 
         return DB::transaction(function () use ($request) {
             $order = Order::create([
@@ -56,7 +54,6 @@ class OrderController extends Controller
                 $product = Product::findOrFail($item['product_id']);
 
                 $uploadedFile = $request->file("items.$index.file");
-
                 $filePath = $this->storeFile($uploadedFile);
 
                 OrderItem::create([
@@ -77,7 +74,6 @@ class OrderController extends Controller
                 'operator_fee_total' => $totalFee,
             ]);
 
-            // Update operator balance
             auth()->user()->increment('balance', $totalFee);
 
             return redirect()->route('orders.index')->with('success', 'Order created successfully');

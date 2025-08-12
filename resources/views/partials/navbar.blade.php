@@ -6,12 +6,13 @@
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
                         <img src="{{ asset('uploads/logo.png') }}" class="h-8 w-8 text-gray-700" alt="logo">
-                        <span class="ml-2 text-xl font-semibold">Prima</span>
+                        <span class="text-2xl mt-2 font-bold">rima</span>
                     </div>
 
                     <style>
                         .alink {
                             color: #1e2939!important;
+                            font-family: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif!important;
                         }
                     </style>
 

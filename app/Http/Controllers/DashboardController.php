@@ -27,8 +27,13 @@ class DashboardController extends Controller
         $totalRevenue = Order::sum('total_price');
         $totalWithdrawn = Withdrawal::where('status', 'approved')->sum('amount');
 
+        $revenueAfterWithdraw = $totalRevenue - $totalWithdrawn;
+        if ($revenueAfterWithdraw < 0) {
+            $revenueAfterWithdraw = 0;
+        }
+
         $stats = [
-            'totalRevenue' => $totalRevenue - $totalWithdrawn,
+            'totalRevenue' => $revenueAfterWithdraw,
             'totalOrders' => Order::count(),
             'totalProducts' => Product::count(),
             'totalOperators' => User::where('role', 'operator')->count(),

@@ -8,13 +8,19 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // Show login form
+    // Show admin/operator login form
     public function showLogin()
     {
-        return view('auth.login');
+        return view('auth.login', ['isCustomer' => false]);
     }
 
-    // Handle login
+    // Show customer login form
+    public function showLoginForm()
+    {
+        return view('auth.login', ['isCustomer' => true]);
+    }
+
+    // Handle login for both admin/operator and customer
     public function login(Request $request)
     {
         $request->validate([
@@ -22,7 +28,6 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Determine if login is email or username
         $field = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
 
         if (!Auth::attempt([
@@ -35,6 +40,11 @@ class AuthController extends Controller
         }
 
         $request->session()->regenerate();
+
+        // Redirect based on user type
+        if (Auth::user()->type === 'customer') {
+            return redirect()->intended(route('customer.dashboard'));
+        }
 
         return redirect()->intended(route('dashboard'));
     }
