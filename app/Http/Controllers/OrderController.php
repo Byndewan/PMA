@@ -13,9 +13,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = auth()->user()->isAdmin()
-            ? Order::latest()->paginate(10)
-            : Order::where('user_id', auth()->id())->latest()->paginate(10);
+        $orders = Order::latest()->paginate(10);
 
         return view('orders.index', compact('orders'));
     }
@@ -98,7 +96,10 @@ class OrderController extends Controller
 
         $order->update($request->all());
 
-        return redirect()->route('orders.index')->with('success', 'Order updated successfully');
+        return redirect()->route('orders.index')
+            ->with('success', 'Order updated successfully')
+            ->with('notify', true)
+            ->with('status_message', $order->status);
     }
 
     public function destroy($id)

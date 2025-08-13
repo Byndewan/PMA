@@ -57,8 +57,8 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
-        $lockedBalance = Order::where('user_id', $user->id)
-            ->whereIn('status', ['queue', 'process'])
+        $lockedBalance = Order::
+            whereIn('status', ['queue', 'process'])
             ->sum('operator_fee_total');
 
         $availableBalance = $user->balance - $lockedBalance;
@@ -67,21 +67,21 @@ class DashboardController extends Controller
             'balance' => $user->balance,
             'lockedBalance' => $lockedBalance,
             'availableBalance' => $availableBalance,
-            'todayOrders' => Order::where('user_id', $user->id)
-                ->whereDate('created_at', today())
+            'todayOrders' => Order::
+                whereDate('created_at', today())
                 ->count(),
-            'pendingOrders' => Order::where('user_id', $user->id)
-                ->whereIn('status', ['queue', 'process'])
+            'pendingOrders' => Order::
+                whereIn('status', ['queue', 'process'])
                 ->count(),
         ];
 
-        $recentOrders = Order::where('user_id', $user->id)
-            ->latest()
+        $recentOrders = Order::
+            latest()
             ->take(5)
             ->get();
 
-        $recentWithdrawals = Withdrawal::where('user_id', $user->id)
-            ->latest()
+        $recentWithdrawals = Withdrawal::
+            latest()
             ->take(3)
             ->get();
 

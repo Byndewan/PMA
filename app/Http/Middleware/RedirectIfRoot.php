@@ -14,7 +14,7 @@ class RedirectIfRoot
         if ($request->is('/')) {
             return redirect('/login');
         } elseif (Auth::check()) {
-            return redirect('/dashboard');
+            return redirect('/crew/dashboard');
         }
 
         return $next($request);

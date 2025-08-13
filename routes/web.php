@@ -32,7 +32,7 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Admin Routes (Middleware: auth + admin)
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('crew')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('products', ProductController::class);
     Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
@@ -40,7 +40,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Operator Routes (Middleware: auth + operator)
-Route::middleware(['auth', 'role:operator,admin'])->group(function () {
+Route::prefix('crew')->middleware(['auth', 'role:operator,admin'])->group(function () {
     Route::resource('orders', OrderController::class);
     Route::get('/withdrawals/create', [WithdrawalController::class, 'create'])->name('withdrawals.create');
     Route::get('/withdrawals/show/{id}', [WithdrawalController::class, 'show'])->name('withdrawals.show');
@@ -48,7 +48,7 @@ Route::middleware(['auth', 'role:operator,admin'])->group(function () {
 });
 
 // Customer Routes (Middleware: auth + customer)
-Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function () {
+Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('customer.dashboard');
 
     // Products
@@ -74,6 +74,7 @@ Route::prefix('customer')->middleware(['auth', 'role:customer'])->group(function
 });
 
 // Dashboard Umum (untuk semua role)
-Route::middleware('auth')->group(function () {
+Route::prefix('crew')->middleware(['auth', 'role:admin,operator'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
+

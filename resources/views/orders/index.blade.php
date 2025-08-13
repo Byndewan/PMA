@@ -105,6 +105,38 @@
     </div>
 </div>
 
+@if(session('notify') && session('status_message'))
+<script>
+    const status = "{{ session('status_message') }}";
+
+    // Mapping status ke pesan notifikasi
+    const messages = {
+        queue: "Pesanan Anda sedang dalam antrean. Mohon tunggu prosesnya.",
+        process: "Pesanan Anda sekarang sedang diproses.",
+        done: "Pesanan Anda siap diambil.",
+        taken: "Pesanan telah diterima. Terima kasih!"
+    };
+
+    const bodyMessage = messages[status] || "Status Pesanan di Update.";
+
+    if (Notification.permission === "granted") {
+        new Notification("Order Updated", {
+            body: bodyMessage,
+            icon: "{{ asset('uploads/logo.png') }}"
+        });
+    } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                new Notification("Order Updated", {
+                    body: bodyMessage,
+                    icon: "{{ asset('uploads/logo.png') }}"
+                });
+            }
+        });
+    }
+</script>
+@endif
+
 <script>
     // Status filter
     document.getElementById('status-filter').addEventListener('change', function(e) {
