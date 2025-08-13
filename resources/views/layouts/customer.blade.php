@@ -15,42 +15,26 @@
 @endsection
 
 @section('content')
-<div class="flex min-h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 bg-white border-r border-gray-200 p-4 hidden md:block">
-        <div class="mb-8">
-            <h2 class="text-xl font-bold text-gray-800">Customer Panel</h2>
-        </div>
+<div class="min-h-screen">
 
-        <nav class="space-y-1">
-            <a href="{{ route('customer.dashboard') }}"
-               class="sidebar-link {{ request()->is('customer/dashboard') ? 'active' : '' }}">
-                <i class="fas fa-tachometer-alt"></i>
-                Dashboard
-            </a>
-            <a href="{{ route('customer.products.index') }}"
-               class="sidebar-link {{ request()->is('customer/products*') ? 'active' : '' }}">
-                <i class="fas fa-box"></i>
-                Products
-            </a>
-            <a href="{{ route('customer.orders.index') }}"
-               class="sidebar-link {{ request()->is('customer/orders*') ? 'active' : '' }}">
-                <i class="fas fa-shopping-cart"></i>
-                My Orders
-            </a>
-            <a href="{{ route('customer.profile.edit') }}"
-               class="sidebar-link {{ request()->is('customer/profile*') ? 'active' : '' }}">
-                <i class="fas fa-user"></i>
-                Profile
-            </a>
-        </nav>
-    </div>
+    <style>
+        a {
+            text-decoration: none !important;
+        }
+    </style>
 
-    <!-- Main Content -->
-    <div class="flex-1 bg-gray-50">
-        <div class="p-6">
-            @yield('customer_content')
+    <!-- Page Heading -->
+    @if(isset($header))
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            {{ $header }}
         </div>
-    </div>
+    </header>
+    @endif
+
+    <!-- Page Content -->
+    <main class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        @yield('customer_content')
+    </main>
 </div>
 @endsection

@@ -25,34 +25,51 @@ class CustomerOrderController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'notes' => 'nullable|string|max:500',
-            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'customer_name' => 'required|max:255',
+            'customer_phone' => 'required|max:13',
+            'items' => 'required|array|min:1',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.file' => 'required|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
         return DB::transaction(function () use ($request) {
             $product = Product::findOrFail($request->product_id);
-            $filePath = $this->storeFile($request->file('file'));
 
             $order = Order::create([
                 'user_id' => auth()->id(),
-                'customer_name' => auth()->user()->name,
-                'phone' => auth()->user()->phone,
+                'customer_name' => $request->customer_name,
+                'phone' => $request->customer_phone,
                 'status' => 'pending',
-                'total_price' => $product->price * $request->quantity,
-                'operator_fee_total' => $product->operator_fee * $request->quantity,
+                'total_price' => 0,
+                'operator_fee_total' => 0,
                 'notes' => $request->notes,
                 'order_number' => 'ORD-' . time(),
+                'payment_status' => 'pending',
             ]);
 
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'quantity' => $request->quantity,
-                'price_per_unit' => $product->price,
-                'operator_fee' => $product->operator_fee,
-                'file_path' => $filePath,
+            $totalPrice = 0;
+            $totalFee = 0;
+
+            foreach ($request->items as $index => $item) {
+                $uploadedFile = $request->file("items.$index.file");
+                $filePath = $this->storeFile($uploadedFile);
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $item['quantity'],
+                    'price_per_unit' => $product->price,
+                    'operator_fee' => $product->operator_fee,
+                    'file_path' => $filePath,
+                ]);
+
+                $totalPrice += $product->price * $item['quantity'];
+                $totalFee += $product->operator_fee * $item['quantity'];
+            }
+
+            $order->update([
+                'total_price' => $totalPrice,
+                'operator_fee_total' => $totalFee,
             ]);
 
             return redirect()->route('customer.orders.show', $order)
@@ -67,8 +84,7 @@ class CustomerOrderController extends Controller
 
     public function cancel(Order $order)
     {
-
-        if ($order->status !== 'pending') {
+        if (!in_array($order->status, ['pending', 'queue'])) {
             return back()->with('error', 'Only pending orders can be canceled.');
         }
 
@@ -78,15 +94,17 @@ class CustomerOrderController extends Controller
 
     public function upload(Request $request, Order $order)
     {
-
         $request->validate([
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'item_id' => 'required|exists:order_items,id',
         ]);
 
+        $item = $order->items()->where('id', $request->item_id)->firstOrFail();
         $filePath = $this->storeFile($request->file('file'));
-        $order->items()->update(['file_path' => $filePath]);
 
-        return back()->with('success', 'File updated successfully.');
+        $item->update(['file_path' => $filePath]);
+
+        return back()->with('success', 'Foto berhasil diperbaharui.');
     }
 
     public function payment(Order $order)
@@ -94,18 +112,10 @@ class CustomerOrderController extends Controller
         return view('customer.orders.payment', compact('order'));
     }
 
-    public function submitPayment(Request $request, Order $order)
+   public function submitPayment(Request $request, Order $order)
     {
-
-        $request->validate([
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        $paymentProofPath = $request->file('payment_proof')->store('payment_proofs', 'public');
-
         $order->update([
-            'payment_status' => 'pending',
-            'payment_proof' => $paymentProofPath,
+            'payment_status' => 'pending'
         ]);
 
         return redirect()->route('customer.orders.show', $order)

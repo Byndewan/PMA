@@ -15,7 +15,7 @@ return new class extends Migration
                 $table->id();
                 $table->string('order_number')->unique()->nullable();
                 $table->foreignId('user_id')->constrained()->onDelete('cascade');
-                $table->enum('status', ['queue', 'process', 'done', 'taken'])->default('queue');
+                $table->enum('status', ['queue', 'process', 'done', 'taken', 'canceled', 'pending'])->default('pending');
                 $table->text('customer_name')->nullable();
                 $table->text('phone')->nullable();
                 $table->decimal('total_price', 12, 2);

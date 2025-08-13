@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    protected $fillable = ['name', 'email', 'username', 'password', 'role', 'balance'];
+    protected $guarded;
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -18,29 +20,39 @@ class User extends Authenticatable
         ];
     }
 
-    public function orders()
+    public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
-    public function withdrawals()
+    public function notifications(): HasMany
     {
-        return $this->hasMany(Withdrawal::class);
+        return $this->hasMany(Notification::class);
     }
 
-    public function qrTokens()
+    public function hasFavorited(): BelongsToMany
     {
-        return $this->hasMany(QrToken::class);
+        return $this->belongsToMany(Product::class, 'product_favorites');
     }
 
-    public function isAdmin()
+    public function favoriteProducts(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'product_favorites');
+    }
+
+    public function isAdmin(): bool
     {
         return $this->role === 'admin';
     }
 
-    public function isOperator()
+    public function isOperator(): bool
     {
         return $this->role === 'operator';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === 'customer';
     }
 
     public function scopeFilter($query, array $filters)
@@ -56,6 +68,16 @@ class User extends Authenticatable
         if (!empty($filters['role'])) {
             $query->where('role', $filters['role']);
         }
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
+
+    public function qrTokens()
+    {
+        return $this->hasMany(QrToken::class);
     }
 
 }

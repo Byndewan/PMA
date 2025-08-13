@@ -10,21 +10,14 @@ class CustomerProductController extends Controller
 {
     public function index()
     {
-        $products = Product::where('is_active', true)
-            ->with('category')
-            ->filter(request(['search', 'category']))
-            ->paginate(12);
+        $products = Product::where('is_active', true)->filter(request(['search']))->paginate(12);
 
         return view('customer.products.index', compact('products'));
     }
 
     public function show(Product $product)
     {
-        $relatedProducts = Product::where('category_id', $product->category_id)
-            ->where('id', '!=', $product->id)
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
+        $relatedProducts = Product::where('id', '!=', $product->id)->inRandomOrder()->limit(4)->get();
 
         return view('customer.products.show', compact('product', 'relatedProducts'));
     }
@@ -33,12 +26,23 @@ class CustomerProductController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->favoriteProducts()->where('product_id', $product->id)->exists()) {
+        $isFavorite = $user->favoriteProducts()->where('product_id', $product->id)->exists();
+
+        if ($isFavorite) {
             $user->favoriteProducts()->detach($product->id);
-            return back()->with('success', 'Product removed from favorites.');
+            $action = 'removed';
+        } else {
+            $user->favoriteProducts()->attach($product->id);
+            $action = 'added';
         }
 
-        $user->favoriteProducts()->attach($product->id);
-        return back()->with('success', 'Product added to favorites.');
+        if (request()->expectsJson()) {
+            return response()->json(['action' => $action]);
+        }
+
+        return back()->with('success', $action === 'added'
+            ? 'Product added to favorites.'
+            : 'Product removed from favorites.');
     }
+
 }

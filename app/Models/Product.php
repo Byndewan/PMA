@@ -3,26 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
-    protected $fillable = ['name', 'format', 'price', 'operator_fee', 'estimate_time', 'is_active'];
+    protected $guarded;
 
-    public function orderItems()
+    protected $casts = [
+        'price' => 'decimal:2',
+        'operator_fee' => 'decimal:2',
+        'is_active' => 'boolean',
+    ];
+
+    public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function favoritedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'product_favorites');
     }
 
     public function scopeFilter($query, array $filters)
     {
         if (!empty($filters['search'])) {
-            $query->where('name', 'like', '%' . $filters['search'] . '%')
-                ->orWhere('description', 'like', '%' . $filters['search'] . '%');
+            $query->where('name', 'like', '%' . $filters['search'] . '%');
         }
-
-        if (!empty($filters['is_active'])) {
-            $query->where('is_active', $filters['is_active']);
-        }
-}
-
+    }
 }

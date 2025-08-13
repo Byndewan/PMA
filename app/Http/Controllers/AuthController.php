@@ -41,8 +41,8 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect based on user type
-        if (Auth::user()->type === 'customer') {
+        // Redirect based on user role
+        if (Auth::user()->role === 'customer') {
             return redirect()->intended(route('customer.dashboard'));
         }
 
