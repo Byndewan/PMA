@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Customer\CustomerController;
 use App\Http\Controllers\Customer\CustomerOrderController;
 use App\Http\Controllers\Customer\CustomerProductController;
@@ -14,7 +13,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
-// Auth Routes
 Route::middleware('guest')->group(function () {
     // Admin/Operator Login
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -27,11 +25,21 @@ Route::middleware('guest')->group(function () {
     // QR Login
     Route::get('/qr-login', [QrTokenController::class, 'showQRLogin'])->name('qr.login');
     Route::post('/qr-login', [QrTokenController::class, 'verifyQRToken']);
+
+    // Social Login Routes
+    Route::get('/login/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
+    Route::get('/login/google/callback', [AuthController::class, 'handleGoogleCallback']);
+
+    // Route::get('/login/facebook', [AuthController::class, 'redirectToFacebook'])->name('login.facebook');
+    // Route::get('/login/facebook/callback', [AuthController::class, 'handleFacebookCallback']);
+
+    // Register
+    Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('/register/post', [AuthController::class, 'register']);
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Admin Routes (Middleware: auth + admin)
 Route::prefix('crew')->middleware(['auth', 'role:admin'])->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('products', ProductController::class);
@@ -39,15 +47,14 @@ Route::prefix('crew')->middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])->name('withdrawals.approve');
 });
 
-// Operator Routes (Middleware: auth + operator)
 Route::prefix('crew')->middleware(['auth', 'role:operator,admin'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('orders', OrderController::class);
     Route::get('/withdrawals/create', [WithdrawalController::class, 'create'])->name('withdrawals.create');
     Route::get('/withdrawals/show/{id}', [WithdrawalController::class, 'show'])->name('withdrawals.show');
     Route::post('/withdrawals', [WithdrawalController::class, 'store'])->name('withdrawals.store');
 });
 
-// Customer Routes (Middleware: auth + customer)
 Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/dashboard', [CustomerController::class, 'dashboard'])->name('customer.dashboard');
 
@@ -72,9 +79,3 @@ Route::middleware(['auth', 'role:customer'])->group(function () {
     Route::get('/orders/{order}/payment', [CustomerOrderController::class, 'payment'])->name('customer.orders.payment');
     Route::post('/orders/{order}/payment', [CustomerOrderController::class, 'submitPayment'])->name('customer.orders.submit_payment');
 });
-
-// Dashboard Umum (untuk semua role)
-Route::prefix('crew')->middleware(['auth', 'role:admin,operator'])->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-});
-

@@ -61,9 +61,16 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-100 py-4 mt-auto">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-400 text-sm">
-                &copy; {{ date('Y') }} Prima System
+        <footer class="py-3 m-0 bg-[#f1f1f1]">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <div class="flex justify-center items-center gap-2 mb-3">
+                    <span class="font-medium text-gray-900">Prima</span>
+                    <span class="text-gray-300">|</span>
+                    <span class="text-sm text-gray-600">Pesan, Tunggu dan Siap Diambil</span>
+                </div>
+                <p class="text-sm text-gray-500 mb-0">
+                    © {{ date('Y') }} Prima. Bagian dari @UPORPL
+                </p>
             </div>
         </footer>
     </div>

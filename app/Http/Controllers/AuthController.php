@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -47,6 +51,91 @@ class AuthController extends Controller
         }
 
         return redirect()->intended(route('dashboard'));
+    }
+
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+
+            $user = User::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                $user = User::create([
+                    'name' => $googleUser->getName(),
+                    'email' => $googleUser->getEmail(),
+                    'password' => bcrypt(Str::random(32)),
+                    'role' => 'customer',
+                    'provider' => 'google',
+                    'provider_id' => $googleUser->getId(),
+                ]);
+            }
+
+            Auth::login($user);
+
+            return redirect()->intended(route('customer.dashboard'));
+
+        } catch (\Exception $e) {
+            return redirect()->route('login')->withErrors('Login dengan Google gagal: '.$e->getMessage());
+        }
+    }
+
+    // Facebook Login
+    // public function redirectToFacebook()
+    // {
+    //     return Socialite::driver('facebook')->redirect();
+    // }
+
+    // public function handleFacebookCallback()
+    // {
+    //     try {
+    //         $facebookUser = Socialite::driver('facebook')->user();
+
+    //         $user = User::where('email', $facebookUser->getEmail())->first();
+
+    //         if (!$user) {
+    //             $user = User::create([
+    //                 'name' => $facebookUser->getName(),
+    //                 'email' => $facebookUser->getEmail(),
+    //                 'password' => bcrypt(Str::random(32)),
+    //                 'role' => 'customer',
+    //                 'provider' => 'facebook',
+    //                 'provider_id' => $facebookUser->getId(),
+    //             ]);
+    //         }
+
+    //         Auth::login($user);
+
+    //         return redirect()->intended('/customer/dashboard');
+
+    //     } catch (\Exception $e) {
+    //         return redirect()->route('login')->withErrors('Login dengan Facebook gagal: '.$e->getMessage());
+    //     }
+    // }
+
+    public function showRegistrationForm()
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string|max:20|unique:users',
+        ]);
+
+        $user = User::update([
+            'phone' => $request->phone,
+        ]);
+
+        Auth::login($user);
+
+        return redirect()->route('customer.dashboard');
     }
 
     // Handle logout

@@ -21,6 +21,8 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->enum('role', ['admin', 'operator', 'customer'])->default('customer')->nullable();
             $table->decimal('balance', 12, 2)->default(0);
+            $table->string('provider')->nullable();
+            $table->string('provider_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
